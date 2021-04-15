@@ -40,7 +40,7 @@ jobs:
               new_content = ""
               for num, line in enumerate(lines,1):
                   if  num % 2 != 0:
-                      new_line = re.sub(f"(\[(.\d+\w)|(\d+(a|b)\.\d+)\])", "", line )
+                      new_line = re.sub(f"(\[((.\d+\w)|(\d+(a|b)\.\d+))\])", "", line )
                       new_content += new_line
                       new_line = []
                   else:
