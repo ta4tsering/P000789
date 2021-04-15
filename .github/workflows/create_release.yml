@@ -1,8 +1,6 @@
 name: Create Release
 on:
   push:
-    paths:
-      '*/P008165/P008165.opf/**'
     branches: [ main ]
   workflow_dispatch:
 jobs:
@@ -45,6 +43,7 @@ jobs:
                       new_line = re.sub(f"(\[\.\d+\])", "", line )
                       new_content += new_line
                       new_line = []
+                      print("line removed for {n}")
                   else:
                       new_content += "\n"
               return new_content
@@ -52,7 +51,6 @@ jobs:
           def write_hfml(content, hfml_path, vol_num):
               out_fn = Path(f"{hfml_path}/{vol_num}.txt")
               out_fn.write_text(content)
-              print("Done")
 
           if __name__=="__main__":
               pecha_id = Path.cwd().name
