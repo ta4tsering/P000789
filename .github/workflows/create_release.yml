@@ -43,7 +43,7 @@ jobs:
                       new_line = re.sub(f"(\[\.\d+\])", "", line )
                       new_content += new_line
                       new_line = []
-                      print("line removed for {n}")
+                      print("line removed for {num}")
                   else:
                       new_content += "\n"
               return new_content
