@@ -40,10 +40,9 @@ jobs:
               new_content = ""
               for num, line in enumerate(lines,1):
                   if  num % 2 != 0:
-                      new_line = re.sub(f"(\[\.\d+\])", "", line )
+                      new_line = re.sub(f"(\[\d+[a|b]\.\d+\])", "", line )
                       new_content += new_line
                       new_line = []
-                      print("line removed for {num}")
                   else:
                       new_content += "\n"
               return new_content
