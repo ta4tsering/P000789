@@ -33,14 +33,12 @@ jobs:
           
           def get_meta_info(meta_data):
               uuid = meta_data['id'][:6]
-              title = meta_data['source_metadata']['title']
-              volumes = meta_data['source_metadata']['volume']
+              volumes = meta_data['vol2fn']
               cur_text = {}
               meta_info = {}
               num = 1
-              for uid, vol_info in volumes.items():
-                  image_group = vol_info['image_group_id']
-                  vol_num = vol_info['volume_number']
+              for vol_num, image_group in volumes.items():
+                  image_group = volumes[vol_num][1:-4]
                   cur_text[num] = { 
                       'image_group': image_group,
                       'vol_num': vol_num
@@ -48,70 +46,46 @@ jobs:
                   meta_info.update(cur_text)
                   num += 1
                   cur_text = {}
-              return meta_info, title, uuid
+              return meta_info, uuid
+
+
           def change_file_name_pages(pages, pages_path, meta_info):
                for num, vol in enumerate(pages,1):
-                  vol_num = vol[1:]
+                  vol_num = vol
                   for info_num, meta in meta_info.items():
-                      vol = meta['vol_num']
-                      if int(vol/10) == 0:
-                          new_vol = f"00{vol}"
-                          if new_vol == vol_num:
-                              image_group = meta['image_group']
-                              content = pages[f'v{vol_num}']
-                              lines = re.split(f"(\\\n)", content)
-                              pages_content = get_clean_pages(lines)
-                              write_text(pages_content, pages_path, image_group, vol_num)
-                              break
-                      elif int(vol/100) == 0:
-                          new_vol = f"0{vol}"
-                          if new_vol == vol_num:
-                              image_group = meta['image_group']
-                              content = pages[f'v{vol_num}']
-                              lines = re.split(f"(\\\n)", content)
-                              pages_content = get_clean_pages(lines)
-                              write_text(pages_content, pages_path, image_group, vol_num) 
-                              break  
-                      elif f"{vol}" == vol_num:
+                      meta_vol = meta['vol_num']
+                      if meta_vol == vol_num:
                           image_group = meta['image_group']
-                          content = pages[f'v{vol_num}']
+                          content = pages[f'{vol_num}']
                           lines = re.split(f"(\\\n)", content)
                           pages_content = get_clean_pages(lines)
-                          write_text(pages_content, pages_path, image_group, vol_num) 
+                          write_text(pages_content, pages_path, image_group, vol_num)
                           break
+
+
           def change_file_name_plain(meta_info, opf_path, new_path):
               for file in os.listdir(f"{opf_path}/base"):
                   if file.endswith(".txt"):
                       file_path = Path(f"{opf_path}/base/{file}")
-                      file_name = file[1:-4]
+                      file_name = file[:-4]
                       content = Path(f'{file_path}').read_text(encoding='utf-8')
                       for info_num, meta in meta_info.items():
-                          vol = meta['vol_num']
-                          if int(vol/10) == 0:
-                              new_vol = f"00{vol}"
-                              if new_vol == file_name:
-                                  image_group = meta['image_group']
-                                  vol_num = file_name
-                                  write_text(content, new_path, image_group, vol_num )    
-                                  break
-                          elif int(vol/100) == 0:
-                              new_vol = f"0{vol}"
-                              if new_vol == file_name:
-                                  image_group = meta['image_group']
-                                  vol_num = file_name
-                                  write_text(content, new_path, image_group, vol_num )  
-                                  break  
-                          elif f"{vol}" == file_name:
+                          meta_vol = meta['vol_num']
+                          if meta_vol == file_name:
                               image_group = meta['image_group']
                               vol_num = file_name
                               write_text(content, new_path, image_group, vol_num )    
                               break
+
+
           def create_zip(base_path, name):
               with ZipFile(name, 'w') as zipObj:
                   for folderName, subfolders, filenames in os.walk(base_path):
                       for filename in filenames:
                           filePath = os.path.join(folderName, filename)
                           zipObj.write(filePath, basename(filePath))
+
+
           def get_clean_pages(lines):
               new_line = []
               new_content = ""
@@ -123,9 +97,12 @@ jobs:
                   else:
                       new_content += "\n"
               return new_content
+
+
           def write_text(content, new_path, image_group, vol_num):
               out_fn = Path(f"{new_path}/{vol_num}_{image_group}.txt")
               out_fn.write_text(content)
+
               
               
           if __name__=="__main__":
@@ -136,7 +113,7 @@ jobs:
               base_path = Path(f'{opf_path}/base')
               plain_path = Path(f"./output/publication/plains")
               plain_path.mkdir(exist_ok=True, parents=True)
-              meta_info, title, uid = get_meta_info(meta_data)
+              meta_info, uid = get_meta_info(meta_data)
               change_file_name_plain(meta_info, opf_path, plain_path) 
               zip_name = f"བཀའ་འགྱུར།_plain_{uid}.zip"
               create_zip(plain_path, zip_name)
