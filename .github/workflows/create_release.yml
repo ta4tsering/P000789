@@ -115,7 +115,7 @@ jobs:
               plain_path.mkdir(exist_ok=True, parents=True)
               meta_info, uid = get_meta_info(meta_data)
               change_file_name_plain(meta_info, opf_path, plain_path) 
-              zip_name = f"བཀའ་འགྱུར།_plain_{uid}.zip"
+              zip_name = f"{pecha_id}_plain.zip"
               create_zip(plain_path, zip_name)
               pages_path = Path(f"./output/publication/pages")
               pages_path.mkdir(exist_ok=True, parents=True)
@@ -124,7 +124,7 @@ jobs:
               results = serializer.get_result()
               pages = results
               change_file_name_pages(pages, pages_path, meta_info)
-              zip_name = f"བཀའ་འགྱུར།_pages_{uid}.zip"
+              zip_name = f"{pecha_id}_pages.zip"
               create_zip(pages_path, zip_name)
                           
         shell: python
@@ -146,8 +146,8 @@ jobs:
           GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN }}
         with: 
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./བཀའ་འགྱུར།_plain_4c0ea8.zip
-          asset_name: བཀའ་འགྱུར།_plain_4c0ea8.zip
+          asset_path: ./${{ github.event.repository.name }}_plain.zip
+          asset_name: bka_gyur_phug_brag_bris_ma_plain_4c0ea8.zip
           asset_content_type: text/zip
       
       - name: upload hfml assets
@@ -156,6 +156,6 @@ jobs:
           GITHUB_TOKEN: ${{  secrets.GITHUB_TOKEN }}
         with:  
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./བཀའ་འགྱུར།_pages_4c0ea8.zip
-          asset_name: བཀའ་འགྱུར།_pages_4c0ea8.zip
+          asset_path: ./${{ github.event.repository.name }}_pages.zip
+          asset_name: bka_gyur_phug_brag_bris_ma_pages_4c0ea8.zip
           asset_content_type: text/zip
