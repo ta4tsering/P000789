@@ -24,41 +24,36 @@ jobs:
         \    num = 1\n    for vol_num, image_group in volumes.items():\n        image_group\
         \ = volumes[vol_num][1:-4]\n        cur_text[num] = { \n            'image_group':\
         \ image_group,\n            'vol_num': vol_num\n        }\n        meta_info.update(cur_text)\n\
-        \        num += 1\n        cur_text = {}\n    return meta_info, uuid\ndef\
-        \ change_file_name_pages(pages, pages_path, meta_info):\n    for num, vol\
-        \ in enumerate(pages,1):\n            vol_num = vol[1:]\n            for info_num,\
-        \ meta in meta_info.items():\n                vol = meta['vol_num']\n    \
-        \            new_vol = f\"{vol:03}\"\n                if new_vol == vol_num:\n\
-        \                    uid = meta['uid']\n                    image_group =\
-        \ meta['image_group']\n                    content = pages[f'v{vol_num}']\n\
-        \                    lines = re.split(f\"(\\\\\\n)\", content)\n         \
-        \           pages_content = get_clean_pages(lines)\n                    write_text(pages_content,\
-        \ pages_path, image_group, vol_num, uid)\n                    break\n    \
-        \ \ndef change_file_name_plain(meta_info, opf_path, new_path):\n    for file\
-        \ in os.listdir(f\"{opf_path}/base\"):\n            if file.endswith(\".txt\"\
-        ):\n                file_path = Path(f\"{opf_path}/base/{file}\")\n      \
-        \          file_name = file[1:-4]\n                content = Path(f'{file_path}').read_text(encoding='utf-8')\n\
-        \                for info_num, meta in meta_info.items():\n              \
-        \      vol = meta['vol_num']\n                    new_vol = f\"{vol:03}\"\n\
-        \                    if new_vol == file_name:\n                        uid\
-        \ = meta['uid']\n                        image_group = meta['image_group']\n\
-        \                        vol_num = file_name\n                        write_text(content,\
-        \ new_path, image_group, vol_num, uid)    \n                        break\n\
-        \ndef create_zip(base_path, name):\n    with ZipFile(name, 'w') as zipObj:\n\
-        \        for folderName, subfolders, filenames in os.walk(base_path):\n  \
-        \          for filename in filenames:\n                filePath = os.path.join(folderName,\
-        \ filename)\n                zipObj.write(filePath, basename(filePath))\n\n\
-        def get_clean_pages(lines):\n    new_line = []\n    new_content = \"\"\n \
-        \   for num, line in enumerate(lines,1):\n        if  num % 2 != 0:\n    \
-        \        new_line = re.sub(f\"(\\[((.\\d+\\w)|(\\d+(a|b)\\.\\d+)|(\\.\\d+))\\\
-        ])\", \"\", line )\n            new_content += new_line\n            new_line\
-        \ = []\n        else:\n            new_content += \"\\n\"\n    return new_content\n\
-        def write_text(content, new_path, image_group, vol_num, uid):\n    out_fn\
-        \ = Path(f\"{new_path}/v{vol_num}_{image_group}_{uid}.txt\")\n    out_fn.write_text(content)\n\
-        \    \n    \nif __name__==\"__main__\":\n    pecha_id = Path.cwd().name\n\
-        \    opf_path = Path.cwd().resolve() / f\"{pecha_id}.opf\"\n    meta_content\
-        \ = Path(f'{opf_path}/meta.yml').read_text(encoding='utf-8')\n    meta_data\
-        \ = yaml.safe_load(meta_content)\n    base_path = Path(f'{opf_path}/base')\n\
+        \        num += 1\n        cur_text = {}\n    return meta_info, uuid\n\ndef\
+        \ change_file_name_pages(pages, pages_path, meta_info):\n  for num, vol in\
+        \ enumerate(pages,1):\n    vol_num = vol\n    for info_num, meta in meta_info.items():\n\
+        \        meta_vol = meta['vol_num']\n        if meta_vol == vol_num:\n   \
+        \         image_group = meta['image_group']\n            content = pages[f'{vol_num}']\n\
+        \            lines = re.split(f\"(\\\\\\n)\", content)\n            pages_content\
+        \ = get_clean_pages(lines)\n            write_text(pages_content, pages_path,\
+        \ image_group, vol_num)\n                break\n\n\ndef change_file_name_plain(meta_info,\
+        \ opf_path, new_path):\n  for file in os.listdir(f\"{opf_path}/base\"):\n\
+        \      if file.endswith(\".txt\"):\n          file_path = Path(f\"{opf_path}/base/{file}\"\
+        )\n          file_name = file[:-4]\n          content = Path(f'{file_path}').read_text(encoding='utf-8')\n\
+        \          for info_num, meta in meta_info.items():\n              meta_vol\
+        \ = meta['vol_num']\n              if meta_vol == file_name:\n           \
+        \       image_group = meta['image_group']\n                  vol_num = file_name\n\
+        \                  write_text(content, new_path, image_group, vol_num )  \
+        \  \n                  break\n\n                  \ndef create_zip(base_path,\
+        \ name):\n    with ZipFile(name, 'w') as zipObj:\n        for folderName,\
+        \ subfolders, filenames in os.walk(base_path):\n            for filename in\
+        \ filenames:\n                filePath = os.path.join(folderName, filename)\n\
+        \                zipObj.write(filePath, basename(filePath))\n\ndef get_clean_pages(lines):\n\
+        \    new_line = []\n    new_content = \"\"\n    for num, line in enumerate(lines,1):\n\
+        \        if  num % 2 != 0:\n            new_line = re.sub(f\"(\\[((.\\d+\\\
+        w)|(\\d+(a|b)\\.\\d+)|(\\.\\d+))\\])\", \"\", line )\n            new_content\
+        \ += new_line\n            new_line = []\n        else:\n            new_content\
+        \ += \"\\n\"\n    return new_content\ndef write_text(content, new_path, image_group,\
+        \ vol_num, uid):\n    out_fn = Path(f\"{new_path}/v{vol_num}_{image_group}_{uid}.txt\"\
+        )\n    out_fn.write_text(content)\n    \n    \nif __name__==\"__main__\":\n\
+        \    pecha_id = Path.cwd().name\n    opf_path = Path.cwd().resolve() / f\"\
+        {pecha_id}.opf\"\n    meta_content = Path(f'{opf_path}/meta.yml').read_text(encoding='utf-8')\n\
+        \    meta_data = yaml.safe_load(meta_content)\n    base_path = Path(f'{opf_path}/base')\n\
         \    plain_path = Path(f\"./output/publication/plains\")\n    plain_path.mkdir(exist_ok=True,\
         \ parents=True)\n    meta_info, uid = get_meta_info(meta_data)\n    change_file_name_plain(meta_info,\
         \ opf_path, plain_path) \n    create_zip(plain_path, f\"{pecha_id}_plain.zip\"\
