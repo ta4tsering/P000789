@@ -49,7 +49,7 @@ jobs:
         d+(a|b)\\.\\d+)|(\\.\\d+))\\])\", \"\", line )\n            new_content +=\
         \ new_line\n            new_line = []\n        else:\n            new_content\
         \ += \"\\n\"\n    return new_content\ndef write_text(content, new_path, image_group,\
-        \ vol_num, uid):\n    out_fn = Path(f\"{new_path}/v{vol_num}_{image_group}_{uid}.txt\"\
+        \ vol_num):\n    out_fn = Path(f\"{new_path}/v{vol_num}_{image_group}.txt\"\
         )\n    out_fn.write_text(content)\n    \n    \nif __name__==\"__main__\":\n\
         \    pecha_id = Path.cwd().name\n    opf_path = Path.cwd().resolve() / f\"\
         {pecha_id}.opf\"\n    meta_content = Path(f'{opf_path}/meta.yml').read_text(encoding='utf-8')\n\
