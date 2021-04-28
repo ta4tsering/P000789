@@ -81,7 +81,7 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ github.event.repository.name }}_plain.zip
-        asset_name: bka_gyur_phug_brag_bris_ma_plain_4c0ea8.zip
+        asset_name: ka_gyur_puk_drak_dri_ma_plain_4c0ea8.zip
         asset_content_type: text/zip
     - name: upload hfml assets
       uses: actions/upload-release-asset@v1
@@ -90,5 +90,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./${{ github.event.repository.name }}_pages.zip
-        asset_name: bka_gyur_phug_brag_bris_ma_pages_4c0ea8.zip
+        asset_name: ka_gyur_puk_drak_dri_ma_pages_4c0ea8.zip
         asset_content_type: text/zip
