@@ -78,7 +78,7 @@ jobs:
 
         def erase_page_index(new_content, meta_info, vol_num):
             new_line = []
-            new_content = ""
+            new_page = ""
             lines = re.split(f"(\\\n)", new_content)
             for num, meta in meta_info.items():
                 meta_num = meta['vol_num']
@@ -88,15 +88,13 @@ jobs:
                         if re.match(f"\s({image_group}\_\d+)", line):
                             new_line = re.sub(f"\s({image_group}\_\d+)", "", line )
                             if new_line != '':
-                                new_content += new_line
+                                new_page += new_line
                                 new_line = []
                         elif re.match(f"(\\\n)", line):
-                            new_content += "\n"
+                            new_page += "\n"
                         elif line != '':
-                            new_content += "\n"
-                        else:
-                            new_content += line
-            return new_content
+                            new_page += line
+            return new_page
 
         def get_clean_pages(lines, meta_info, vol_num):
             new_line = []
@@ -112,7 +110,7 @@ jobs:
             return new_content
 
         def write_text(content, new_path, vol_num, _type):
-            out_fn = Path(f"{new_path}/v{vol_num}_{_type}.txt")
+            out_fn = Path(f"{new_path}/{vol_num}_{_type}.txt")
             out_fn.write_text(content, encoding='utf-8')
 
         if __name__=="__main__":
