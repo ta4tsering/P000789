@@ -116,7 +116,7 @@ jobs:
             out_fn.write_text(content, encoding='utf-8')
 
         if __name__=="__main__":
-             pecha_id = Path.cwd().name
+            pecha_id = Path.cwd().name
             opf_path = Path.cwd().resolve() / f"{pecha_id}.opf"
             meta_content = Path(f'{opf_path}/meta.yml').read_text(encoding='utf-8')
             meta_data = yaml.safe_load(meta_content)
