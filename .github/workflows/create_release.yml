@@ -85,8 +85,8 @@ jobs:
                 if vol_num == meta_num:
                     image_group = meta['image_group']
                     for num, line in enumerate(lines,1):
-                        if re.match(f"\s({image_group}\_\d+)", line):
-                            new_line = re.sub(f"\s({image_group}\_\d+)", "", line )
+                        if re.match(f"\s({image_group}\_)", line):
+                            new_line = re.sub(f"\s({image_group}\_)", "", line )
                             if new_line != '':
                                 new_page += new_line
                                 new_line = []
