@@ -17,52 +17,125 @@ jobs:
 
         '
     - name: Create zip file for text and hfml
-      run: "import os \nimport re\nimport yaml\nfrom zipfile36 import ZipFile\nfrom\
-        \ os.path import basename\nfrom pathlib import Path\nfrom openpecha.serializers\
-        \ import HFMLSerializer\n\n\ndef get_meta_info(meta_data):\n    uuid = meta_data['id'][:6]\n\
-        \    volumes = meta_data['vol2fn']\n    cur_text = {}\n    meta_info = {}\n\
-        \    num = 1\n    for vol_num, image_group in volumes.items():\n        image_group\
-        \ = volumes[vol_num][1:-4]\n        cur_text[num] = { \n            'image_group':\
-        \ image_group,\n            'vol_num': vol_num\n        }\n        meta_info.update(cur_text)\n\
-        \        num += 1\n        cur_text = {}\n    return meta_info, uuid\n\ndef\
-        \ change_file_name_pages(pages, pages_path, meta_info):\n  for num, vol in\
-        \ enumerate(pages,1):\n    vol_num = vol\n    for info_num, meta in meta_info.items():\n\
-        \        meta_vol = meta['vol_num']\n        if meta_vol == vol_num:\n   \
-        \         image_group = meta['image_group']\n            content = pages[f'{vol_num}']\n\
-        \            lines = re.split(f\"(\\\\\\n)\", content)\n            pages_content\
-        \ = get_clean_pages(lines)\n            write_text(pages_content, pages_path,\
-        \ image_group, vol_num)\n            break\n\n\ndef change_file_name_plain(meta_info,\
-        \ opf_path, new_path):\n  for file in os.listdir(f\"{opf_path}/base\"):\n\
-        \      if file.endswith(\".txt\"):\n          file_path = Path(f\"{opf_path}/base/{file}\"\
-        )\n          file_name = file[:-4]\n          content = Path(f'{file_path}').read_text(encoding='utf-8')\n\
-        \          for info_num, meta in meta_info.items():\n              meta_vol\
-        \ = meta['vol_num']\n              if meta_vol == file_name:\n           \
-        \       image_group = meta['image_group']\n                  vol_num = file_name\n\
-        \                  write_text(content, new_path, image_group, vol_num )  \
-        \  \n                  break\n\n\ndef create_zip(base_path, name):\n    with\
-        \ ZipFile(name, 'w') as zipObj:\n        for folderName, subfolders, filenames\
-        \ in os.walk(base_path):\n            for filename in filenames:\n       \
-        \         filePath = os.path.join(folderName, filename)\n                zipObj.write(filePath,\
-        \ basename(filePath))\n\ndef get_clean_pages(lines):\n    new_line = []\n\
-        \    new_content = \"\"\n    for num, line in enumerate(lines,1):\n      \
-        \  if  num % 2 != 0:\n            new_line = re.sub(f\"(\\[((.\\d+\\w)|(\\\
-        d+(a|b)\\.\\d+)|(\\.\\d+))\\])\", \"\", line )\n            new_content +=\
-        \ new_line\n            new_line = []\n        else:\n            new_content\
-        \ += \"\\n\"\n    return new_content\ndef write_text(content, new_path, image_group,\
-        \ vol_num):\n    out_fn = Path(f\"{new_path}/v{vol_num}_{image_group}.txt\"\
-        )\n    out_fn.write_text(content)\n    \n    \nif __name__==\"__main__\":\n\
-        \    pecha_id = Path.cwd().name\n    opf_path = Path.cwd().resolve() / f\"\
-        {pecha_id}.opf\"\n    meta_content = Path(f'{opf_path}/meta.yml').read_text(encoding='utf-8')\n\
-        \    meta_data = yaml.safe_load(meta_content)\n    base_path = Path(f'{opf_path}/base')\n\
-        \    plain_path = Path(f\"./output/publication/plains\")\n    plain_path.mkdir(exist_ok=True,\
-        \ parents=True)\n    meta_info, uid = get_meta_info(meta_data)\n    change_file_name_plain(meta_info,\
-        \ opf_path, plain_path) \n    create_zip(plain_path, f\"{pecha_id}_plain.zip\"\
-        )\n    pages_path = Path(f\"./output/publication/pages\")\n    pages_path.mkdir(exist_ok=True,\
-        \ parents=True)\n    serializer = HFMLSerializer(opf_path, layers=[\"Pagination\"\
-        ])\n    serializer.apply_layers()\n    results = serializer.get_result()\n\
-        \    pages = results\n    change_file_name_pages(pages, pages_path, meta_info)\n\
-        \    create_zip(pages_path, f\"{pecha_id}_pages.zip\")\n                \n"
+      run: |
+        import os 
+        import re
+        import yaml
+        from zipfile36 import ZipFile
+        from os.path import basename
+        from pathlib import Path
+        from openpecha.serializers import HFMLSerializer
+
+        def get_meta_info(meta_data):
+            volumes = meta_data['vol2fn']
+            cur_text = {}
+            meta_info = {}
+            num = 1
+            for vol_num, image_group in volumes.items():
+                image_group = volumes[vol_num][1:-4]
+                cur_text[num] = { 
+                    'image_group': image_group,
+                    'vol_num': vol_num,
+                }
+                meta_info.update(cur_text)
+                num += 1
+                cur_text = {}
+            return meta_info
+
+        def change_file_name_pages(pages, pages_path, meta_info):
+            _type = "pages"
+            for num, vol_num in enumerate(pages,1):
+                for info_num, meta in meta_info.items():
+                    meta_vol = meta['vol_num']
+                    if meta_vol == vol_num:
+                        content = pages[f'{vol_num}']
+                        lines = re.split(f"(\\\n)", content)
+                        pages_content = get_clean_pages(lines, meta_info, vol_num)
+                        write_text(pages_content, pages_path, vol_num, _type)
+                        break
+
+        def change_file_name_plain(meta_info, opf_path, new_path):
+            _type = "plain"
+            for file in os.listdir(f"{opf_path}/base"):
+                if file.endswith(".txt"):
+                    file_path = Path(f"{opf_path}/base/{file}")
+                    file_name = file[1:-4]
+                    content = Path(f'{file_path}').read_text(encoding='utf-8')
+                    for info_num, meta in meta_info.items():
+                        vol = meta['vol_num']
+                        new_vol = vol[1:]
+                        if new_vol == file_name:
+                            vol_num = file_name
+                            write_text(content, new_path, vol_num, _type)    
+                            break
+
+        def create_zip(base_path, name):
+            with ZipFile(name, 'w') as zipObj:
+                for folderName, subfolders, filenames in os.walk(base_path):
+                    for filename in filenames:
+                        filePath = os.path.join(folderName, filename)
+                        zipObj.write(filePath, basename(filePath))
+
+        def erase_page_index(new_content, meta_info, vol_num):
+            new_line = []
+            new_content = ""
+            lines = re.split(f"(\\\n)", new_content)
+            for num, meta in meta_info.items():
+                meta_num = meta['vol_num']
+                if vol_num == meta_num:
+                    image_group = meta['image_group']
+                    for num, line in enumerate(lines,1):
+                        if re.match(f"\s({image_group}\_\d+)", line):
+                            new_line = re.sub(f"\s({image_group}\_\d+)", "", line )
+                            if new_line != '':
+                                new_content += new_line
+                                new_line = []
+                        elif re.match(f"(\\\n)", line):
+                            new_content += "\n"
+                        elif line != '':
+                            new_content += "\n"
+                        else:
+                            new_content += line
+            return new_content
+
+        def get_clean_pages(lines, meta_info, vol_num):
+            new_line = []
+            new_content = ""
+            for num, line in enumerate(lines,1):
+                if  num % 2 != 0:
+                    new_line = re.sub(f"(\[((.\d+\w)|(\d+(a|b)\.\d+)|(\.\d+))\])", "", line )
+                    new_content += new_line
+                    new_line = []
+                else:
+                    new_content += "\n"
+            new_content = erase_page_index(new_content, meta_info, vol_num)
+            return new_content
+
+        def write_text(content, new_path, vol_num, _type):
+            out_fn = Path(f"{new_path}/v{vol_num}_{_type}.txt")
+            out_fn.write_text(content, encoding='utf-8')
+
+        if __name__=="__main__":
+            pecha_id = 'P000789'
+            opf_path = Path(f'./{pecha_id}/{pecha_id}.opf')
+            meta_content = Path(f'./{pecha_id}/{pecha_id}.opf/meta.yml').read_text(encoding='utf-8')
+            meta_data = yaml.safe_load(meta_content)
+            base_path = Path(f'{opf_path}/base')
+            plain_path = Path(f"./output/publication/plains")
+            plain_path.mkdir(exist_ok=True, parents=True)
+            meta_info = get_meta_info(meta_data)
+            change_file_name_plain(meta_info, opf_path, plain_path) 
+            create_zip(plain_path, f"{pecha_id}_plain.zip")
+            pages_path = Path(f"./output/publication/pages")
+            pages_path.mkdir(exist_ok=True, parents=True)
+            serializer = HFMLSerializer(opf_path, layers=["Pagination"])
+            serializer.apply_layers()
+            results = serializer.get_result()
+            pages = results
+            change_file_name_pages(pages, pages_path, meta_info)
+            create_zip(pages_path, f"{pecha_id}_pages.zip")
       shell: python
+      
     - name: Create Github Release
       id: create_release
       uses: actions/create-release@v1
@@ -73,6 +146,7 @@ jobs:
         release_name: Release ${{ github.run_number }}
         draft: false
         prerelease: false
+        
     - name: upload base assets
       uses: actions/upload-release-asset@v1
       env:
@@ -82,6 +156,7 @@ jobs:
         asset_path: ./${{ github.event.repository.name }}_plain.zip
         asset_name: ka_gyur_puk_drak_dri_ma_plain_4c0ea8.zip
         asset_content_type: text/zip
+        
     - name: upload hfml assets
       uses: actions/upload-release-asset@v1
       env:
