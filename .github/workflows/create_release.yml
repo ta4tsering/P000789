@@ -79,6 +79,7 @@ jobs:
         def erase_page_index(new_content, meta_info, vol_num):
             new_line = []
             new_page = ""
+            page_num = 1
             lines = re.split(f"(\\\n)", new_content)
             for num, meta in meta_info.items():
                 meta_num = meta['vol_num']
@@ -88,7 +89,14 @@ jobs:
                         if re.match(f"\s({image_group}\_)", line):
                             new_line = re.sub(f"\s({image_group}\_)", "", line )
                             if new_line != '':
-                                new_page += new_line
+                                img_num = int(new_line)
+                                if img_num%2 == 0:
+                                    num = int(img_num/2)
+                                    page_index = f"{num}b"
+                                elif img_num%2 != 0:
+                                    num = int((img_num/2)+0.5)
+                                    page_index = f"{num}a"
+                                new_page += page_index
                                 new_line = []
                         elif re.match(f"(\\\n)", line):
                             new_page += "\n"
